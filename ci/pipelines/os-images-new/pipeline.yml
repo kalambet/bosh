@@ -12,8 +12,7 @@ jobs:
         passed:
           - start-job
       - get: ubuntu-trusty-os-image-version
-        params:
-          bump: minor
+        params: {bump: minor}
       - task: build
         file: bosh-src/ci/pipelines/os-images-new/tasks/build.yml
         privileged: true
@@ -22,6 +21,7 @@ jobs:
             OPERATING_SYSTEM_NAME:      ubuntu
             OPERATING_SYSTEM_VERSION:   trusty
       - put: ubuntu-trusty-os-image-version
+        params: {file: version/number}
       - put: ubuntu-trusty-os-image
         params:
           file: ubuntu-trusty-os-image.tgz
