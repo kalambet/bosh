@@ -10,12 +10,12 @@ check_param OPERATING_SYSTEM_NAME
 check_param OPERATING_SYSTEM_VERSION
 
 OS_IMAGE_NAME=$OPERATING_SYSTEM_NAME-$OPERATING_SYSTEM_VERSION-os-image
-OS_IMAGE_DIR=$WORKING_DIR/$OS_IMAGE_NAME/os-image.tgz
+OS_IMAGE=$WORKING_DIR/$OS_IMAGE_NAME.tgz
 
 sudo chown -R ubuntu .
 sudo --preserve-env --set-home --user ubuntu -- /bin/bash --login -i <<SUDO
     bundle install --local
-    bundle exec rake stemcell:build_os_image[$OPERATING_SYSTEM_NAME,$OPERATING_SYSTEM_VERSION,$OS_IMAGE_DIR]
+    bundle exec rake stemcell:build_os_image[$OPERATING_SYSTEM_NAME,$OPERATING_SYSTEM_VERSION,$OS_IMAGE]
 SUDO
 
 #cd $WORKING_DIR
