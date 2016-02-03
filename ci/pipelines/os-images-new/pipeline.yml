@@ -23,6 +23,8 @@ jobs:
             OPERATING_SYSTEM_VERSION:   trusty
       - put: ubuntu-trusty-os-image-version
       - put: ubuntu-trusty-os-image
+        params:
+          file: ubuntu-trusty-os-image.tgz
 
 resources:
   - name: bosh-src
