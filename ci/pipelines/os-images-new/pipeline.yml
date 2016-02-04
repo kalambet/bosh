@@ -21,7 +21,7 @@ jobs:
             OPERATING_SYSTEM_NAME:      ubuntu
             OPERATING_SYSTEM_VERSION:   trusty
       - put: ubuntu-trusty-os-image-version
-        params: {file: version/number}
+        params: {file: ubuntu-trusty-os-image-version/number}
       - put: ubuntu-trusty-os-image
         params:
           file: ubuntu-trusty-os-image.tgz
@@ -37,7 +37,7 @@ resources:
     type: semver
     source:
       driver: s3
-      key: os-image-version
+      key: os-image-version-key
       bucket: {{bucket}}
       access_key_id: {{aws_access_key}}
       secret_access_key: {{aws_secret_key}}
