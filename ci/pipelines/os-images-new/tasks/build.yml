@@ -6,6 +6,9 @@ image: docker:///bosh/os-image-stemcell-builder
 inputs:
 - name: bosh-src
 
+outputs:
+- name: os-image
+
 run:
   path: bosh-src/ci/pipelines/os-images-new/tasks/build.sh
 
