@@ -24,7 +24,7 @@ jobs:
         params: {file: ubuntu-trusty-os-image-version/number}
       - put: ubuntu-trusty-os-image
         params:
-          file: build/os-image/ubuntu-trusty.tgz
+          file: os-image/ubuntu-trusty.tgz
 
 resources:
   - name: bosh-src
@@ -46,6 +46,6 @@ resources:
     type: s3
     source:
       bucket: {{bucket}}
-      regexp: ubuntu-(.*).tgz
+      versioned_file: ubuntu-trusty.tgz
       access_key_id: {{aws_access_key}}
       secret_access_key: {{aws_secret_key}}
