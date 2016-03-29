@@ -32,7 +32,7 @@ then
   # https://bugs.launchpad.net/ubuntu/+source/debootstrap/+bug/1182540
   # The issue was fixed in 1.0.52
   downloaded_file=`mktemp`
-  url="http://archive.ubuntu.com/ubuntu/pool/main/d/debootstrap/debootstrap_1.0.59_all.deb"
+  url="http://archive.ubuntu.com/ubuntu/pool/main/d/debootstrap/debootstrap_1.0.67_all.deb"
   wget $url -qO $downloaded_file
   dpkg -i $downloaded_file
   rm $downloaded_file
