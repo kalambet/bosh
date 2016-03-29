@@ -1,6 +1,7 @@
 require 'cli/core_ext'
 require 'cli/errors'
 require 'cli/cloud_config'
+require 'cli/runtime_config'
 
 require 'json'
 require 'httpclient'
@@ -127,12 +128,20 @@ module Bosh
           get_json("/deployments/#{deployment_name}/errands")
         end
 
-        def list_running_tasks(verbose = 1)
-          get_json("/tasks?state=processing,cancelling,queued&verbose=#{verbose}")
+        def list_running_tasks(verbose = 1, deployment_name = nil)
+          if deployment_name
+            get_json("/tasks?state=processing,cancelling,queued&verbose=#{verbose}&deployment=#{deployment_name}")
+          else
+            get_json("/tasks?state=processing,cancelling,queued&verbose=#{verbose}")
+          end
         end
 
-        def list_recent_tasks(count = 30, verbose = 1)
-          get_json("/tasks?limit=#{count}&verbose=#{verbose}")
+        def list_recent_tasks(count = 30, verbose = 1, deployment_name = nil)
+          if deployment_name
+            get_json("/tasks?limit=#{count}&verbose=#{verbose}&deployment=#{deployment_name}")
+          else
+            get_json("/tasks?limit=#{count}&verbose=#{verbose}")
+          end
         end
 
         def get_release(name)
@@ -178,6 +187,10 @@ module Bosh
         def list_vms(name)
           _, body = get_json_with_status("/deployments/#{name}/vms")
           body
+        end
+
+        def attach_disk(deployment_name, job_name, instance_id, disk_cid)
+          request_and_track(:put, "/disks/#{disk_cid}/attachments?deployment=#{deployment_name}&job=#{job_name}&instance_id=#{instance_id}")
         end
 
         def delete_orphan_disk_by_disk_cid(orphan_disk_cid)
@@ -248,16 +261,30 @@ module Bosh
 
           recreate               = options.delete(:recreate)
           skip_drain             = options.delete(:skip_drain)
+          context                = options.delete(:context)
           options[:content_type] = 'text/yaml'
           options[:payload]      = manifest_yaml
 
           url = '/deployments'
 
           extras = []
-          extras << ['recreate', 'true']   if recreate
+          extras << ['recreate', 'true'] if recreate
+          extras << ['context', JSON.dump(context)] if context
           extras << ['skip_drain', skip_drain] if skip_drain
 
           request_and_track(:post, add_query_string(url, extras), options)
+        end
+
+        def diff_deployment(name, manifest_yaml, no_redact = false)
+          redact_param = no_redact ? '?redact=false' : ''
+          uri = "/deployments/#{name}/diff#{redact_param}"
+          status, body = post(uri, 'text/yaml', manifest_yaml)
+
+          if status == 200
+            JSON.parse(body)
+          else
+            err(parse_error_message(status, body, uri))
+          end
         end
 
         def setup_ssh(deployment_name, job, id, user,
@@ -530,12 +557,7 @@ module Bosh
             body = nil if response_code == 416
           end
 
-          # backward compatible with renaming soap log to cpi log
-          if response_code == 204 && log_type == 'cpi'
-            get_task_output(task_id, offset, 'soap')
-          else
-            [body, new_offset]
-          end
+          [body, new_offset]
         end
 
         def cancel_task(task_id)
@@ -651,6 +673,22 @@ module Bosh
 
         def update_cloud_config(cloud_config_yaml)
           status, _ = post('/cloud_configs', 'text/yaml', cloud_config_yaml)
+          status == 201
+        end
+
+        def get_runtime_config
+          _, runtime_configs = get_json_with_status('/runtime_configs?limit=1')
+          latest = runtime_configs.first
+
+          if !latest.nil?
+            Bosh::Cli::RuntimeConfig.new(
+                properties: latest["properties"],
+                created_at: latest["created_at"])
+          end
+        end
+
+        def update_runtime_config(runtime_config_yaml)
+          status, _ = post('/runtime_configs', 'text/yaml', runtime_config_yaml)
           status == 201
         end
 

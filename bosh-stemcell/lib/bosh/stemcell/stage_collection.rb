@@ -36,6 +36,7 @@ module Bosh::Stemcell
         :bosh_micro_go,
         :aws_cli,
         :logrotate_config,
+        :dev_tools_config,
       ].reject{ |s| Bosh::Stemcell::Arch.ppc64le? and [:bosh_ruby, :bosh_micro_go].include?(s) }
     end
 
@@ -53,6 +54,8 @@ module Bosh::Stemcell
         warden_stages
       when Infrastructure::Azure then
         azure_stages
+      when Infrastructure::Softlayer then
+        softlayer_stages
       end
 
       stages.concat(finish_stemcell_stages)
@@ -105,7 +108,7 @@ module Bosh::Stemcell
       [
         :system_network,
         :system_open_vm_tools,
-        :disable_blank_passwords,
+        :password_policies,
         :system_vsphere_cdrom,
         :system_parameters,
         :bosh_clean,
@@ -156,6 +159,23 @@ module Bosh::Stemcell
         :bosh_clean_ssh,
         :image_create,
         :image_install_grub,
+      ]
+    end
+
+    def softlayer_stages
+      [
+          :system_network,
+          :system_softlayer_open_iscsi,
+          :system_softlayer_multipath_tools,
+          :disable_blank_passwords,
+          :system_parameters,
+          :bosh_clean,
+          :bosh_harden,
+          :bosh_enable_password_authentication,
+          :bosh_softlayer_agent_settings,
+          :bosh_clean_ssh,
+          :image_create,
+          :image_install_grub,
       ]
     end
 
@@ -243,7 +263,7 @@ module Bosh::Stemcell
         :bosh_monit,
         :bosh_ntpdate,
         :bosh_sudoers,
-        :disable_blank_passwords,
+        :password_policies,
       ]
     end
 

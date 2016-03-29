@@ -39,6 +39,9 @@ describe 'director.yml.erb.erb' do
           'max_tasks' => 100,
           'max_threads' => 32,
           'enable_snapshots' => true,
+          'enable_post_deploy' => false,
+          'generate_vm_passwords' => false,
+          'remove_dev_tools' => false,
           'ignore_missing_gateway' => false,
           'disks' => {
             'max_orphaned_age_in_days' => 3,
@@ -95,6 +98,10 @@ describe 'director.yml.erb.erb' do
 
     it 'should contain the trusted_certs field' do
       expect(parsed_yaml['trusted_certs']).to eq("test_trusted_certs\nvalue")
+    end
+
+    it 'should keep dynamic, COMPONENT-based logging paths' do
+      expect(parsed_yaml['logging']['file']).to eq("/var/vcap/sys/log/director/<%= ENV['COMPONENT'] %>.debug.log")
     end
 
     context 'when domain name specified without all other dns properties' do
@@ -707,6 +714,7 @@ describe 'director.yml.erb.erb' do
               'use_ssl' => false,
               'ssl_verify_peer' => false,
               's3_multipart_threshold' => 123,
+              's3_signature_version' => 52,
               's3_port' => 5155,
               'host' => 'myhost.hostland.edu',
               's3_force_path_style' => true,
@@ -724,6 +732,7 @@ describe 'director.yml.erb.erb' do
               'use_ssl' => false,
               'ssl_verify_peer' => false,
               's3_multipart_threshold' => 123,
+              's3_signature_version' => 52,
               'port' => 5155,
               'host' => 'myhost.hostland.edu',
               's3_force_path_style' => true,
@@ -738,6 +747,7 @@ describe 'director.yml.erb.erb' do
               'use_ssl' => false,
               'ssl_verify_peer' => false,
               's3_multipart_threshold' => 123,
+              's3_signature_version' => 52,
               'port' => 5155,
               'host' => 'myhost.hostland.edu',
               's3_force_path_style' => true,
@@ -756,6 +766,7 @@ describe 'director.yml.erb.erb' do
               'use_ssl' => true,
               'ssl_verify_peer' => false,
               's3_multipart_threshold' => 123,
+              's3_signature_version' => 52,
               'port' => 5155,
               'host' => 'myhost.hostland.edu',
               's3_force_path_style' => true,
@@ -773,6 +784,7 @@ describe 'director.yml.erb.erb' do
                 'use_ssl' => false,
                 'ssl_verify_peer' => false,
                 's3_multipart_threshold' => 123,
+                's3_signature_version' => 52,
                 'port' => 5155,
                 'host' => 'myhost.hostland.edu',
                 's3_force_path_style' => true,
@@ -791,6 +803,7 @@ describe 'director.yml.erb.erb' do
                     'use_ssl' => true,
                     'ssl_verify_peer' => true,
                     's3_force_path_style' => false,
+                    's3_signature_version' => 51,
                     's3_multipart_threshold' => 456,
                   }
                 }
@@ -806,6 +819,7 @@ describe 'director.yml.erb.erb' do
                   'ssl_verify_peer' => true,
                   's3_force_path_style' => false,
                   's3_multipart_threshold' => 456,
+                  's3_signature_version' => 51,
                   'port' => 5155,
                   'host' => 'fakehost.example.com',
                   'region' => 'region'

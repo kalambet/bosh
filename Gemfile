@@ -25,6 +25,8 @@ gem 'rake', '~>10.0'
 # when modified needs to be updated there as well
 gem 'json', '=1.8.3'
 
+gem 'bundler', '~>1.11.0'
+
 group :production do
   # this was pulled from bosh_aws_registry's Gemfile.  Why does it exist?
   # also bosh_openstack_registry, director
@@ -79,4 +81,6 @@ group :development, :test do
   gem 'sqlite3'
   gem 'timecop', '~>0.7.1'
   gem 'blue-shell'
+
+  gem 'unix-crypt'
 end

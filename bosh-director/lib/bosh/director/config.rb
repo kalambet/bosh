@@ -33,7 +33,10 @@ module Bosh::Director
         :max_vm_create_tries,
         :nats_uri,
         :default_ssh_options,
-        :keep_unreachable_vms
+        :keep_unreachable_vms,
+        :enable_post_deploy,
+        :generate_vm_passwords,
+        :remove_dev_tools,
       )
 
       attr_reader(
@@ -163,6 +166,9 @@ module Bosh::Director
         @ignore_missing_gateway = config['ignore_missing_gateway']
 
         @keep_unreachable_vms = config.fetch('keep_unreachable_vms', false)
+        @enable_post_deploy = config.fetch('enable_post_deploy', false)
+        @generate_vm_passwords = config.fetch('generate_vm_passwords', false)
+        @remove_dev_tools = config['remove_dev_tools']
 
         Bosh::Clouds::Config.configure(self)
 
@@ -303,6 +309,25 @@ module Bosh::Director
         Thread.current[:bosh] ||= {}
       end
 
+      def generate_temp_dir
+        temp_dir = Dir.mktmpdir
+        ENV["TMPDIR"] = temp_dir
+        FileUtils.mkdir_p(temp_dir)
+        at_exit do
+          begin
+            if $!
+              status = $!.is_a?(::SystemExit) ? $!.status : 1
+            else
+              status = 0
+            end
+            FileUtils.rm_rf(temp_dir)
+          ensure
+            exit status
+          end
+        end
+        temp_dir
+      end
+
       def patch_sqlite
         return if @patched_sqlite
         @patched_sqlite = true
@@ -411,7 +436,7 @@ module Bosh::Director
         end
 
         Config.logger.debug("Director configured with '#{provider_name}' user management provider")
-        provider_class.new(user_management[provider_name] || {}, Bosh::Director::Api::DirectorUUIDProvider.new(Config))
+        provider_class.new(user_management[provider_name] || {})
       end
     end
 
@@ -437,6 +462,10 @@ module Bosh::Director
 
     def configure_evil_config_singleton!
       Config.configure(hash)
+    end
+
+    def get_uuid_provider
+      Bosh::Director::Api::DirectorUUIDProvider.new(Config)
     end
 
     private

@@ -40,7 +40,7 @@ module Bosh::Stemcell
               :bosh_monit,
               :bosh_ntpdate,
               :bosh_sudoers,
-              :disable_blank_passwords,
+              :password_policies,
               :rsyslog_config,
               :delay_monit_start,
               :system_grub,
@@ -70,7 +70,7 @@ module Bosh::Stemcell
               :bosh_monit,
               :bosh_ntpdate,
               :bosh_sudoers,
-              :disable_blank_passwords,
+              :password_policies,
               :rsyslog_config,
               :delay_monit_start,
               :system_grub,
@@ -98,7 +98,7 @@ module Bosh::Stemcell
               :bosh_monit,
               :bosh_ntpdate,
               :bosh_sudoers,
-              :disable_blank_passwords,
+              :password_policies,
               :rsyslog_config,
               :delay_monit_start,
               :system_grub,
@@ -120,6 +120,7 @@ module Bosh::Stemcell
           :bosh_micro_go,
           :aws_cli,
           :logrotate_config,
+          :dev_tools_config,
         ].reject{ |s| Bosh::Stemcell::Arch.ppc64le? and [:bosh_ruby, :bosh_micro_go].include?(s) }
       end
 
@@ -249,7 +250,7 @@ module Bosh::Stemcell
               [
                 :system_network,
                 :system_open_vm_tools,
-                :disable_blank_passwords,
+                :password_policies,
                 :system_vsphere_cdrom,
                 :system_parameters,
                 :bosh_clean,
@@ -274,7 +275,7 @@ module Bosh::Stemcell
               [
                 :system_network,
                 :system_open_vm_tools,
-                :disable_blank_passwords,
+                :password_policies,
                 :system_vsphere_cdrom,
                 :system_parameters,
                 :bosh_clean,
@@ -303,7 +304,7 @@ module Bosh::Stemcell
               [
                 :system_network,
                 :system_open_vm_tools,
-                :disable_blank_passwords,
+                :password_policies,
                 :system_vsphere_cdrom,
                 :system_parameters,
                 :bosh_clean,
@@ -328,7 +329,7 @@ module Bosh::Stemcell
               [
                 :system_network,
                 :system_open_vm_tools,
-                :disable_blank_passwords,
+                :password_policies,
                 :system_vsphere_cdrom,
                 :system_parameters,
                 :bosh_clean,
@@ -385,6 +386,35 @@ module Bosh::Stemcell
           it 'returns the correct stages' do
             expect(stage_collection.build_stemcell_image_stages).to eq(azure_build_stemcell_image_stages)
             expect(stage_collection.package_stemcell_stages('vhd')).to eq(azure_package_stemcell_stages)
+          end
+        end
+      end
+
+      context 'when using softlayer' do
+        let(:infrastructure) { Infrastructure.for('softlayer') }
+
+        context 'when the operating system is Ubuntu' do
+          let(:operating_system) { OperatingSystem.for('ubuntu') }
+
+          it 'has the correct stages' do
+            expect(stage_collection.build_stemcell_image_stages).to eq(
+              [
+                :system_network,
+                :system_softlayer_open_iscsi,
+                :system_softlayer_multipath_tools,
+                :disable_blank_passwords,
+                :system_parameters,
+                :bosh_clean,
+                :bosh_harden,
+                :bosh_enable_password_authentication,
+                :bosh_softlayer_agent_settings,
+                :bosh_clean_ssh,
+                :image_create,
+                :image_install_grub,
+                :bosh_package_list
+              ]
+            )
+            expect(stage_collection.package_stemcell_stages('ovf')).to eq(vmware_package_stemcell_steps)
           end
         end
       end

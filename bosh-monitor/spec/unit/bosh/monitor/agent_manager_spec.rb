@@ -123,6 +123,28 @@ describe Bhm::AgentManager do
       expect(manager.analyze_agent("007")).to be(true)
     end
 
+    it 'alerts on a timed out agent' do
+      manager.add_agent('mycloud', {'agent_id' => '007', 'index' => '0', 'job' => 'mutator', 'id' => 'some-sort-of-uuid'})
+
+      ts = Time.now
+      allow(Time).to receive(:now).and_return(ts + Bhm.intervals.agent_timeout + 10)
+
+      expect(event_processor).to receive(:process).with(
+        :alert,
+        {
+          severity: 2,
+          source: 'mycloud: mutator(some-sort-of-uuid) [id=007, index=0, cid=]',
+          title: '007 has timed out',
+          created_at: anything,
+          deployment: 'mycloud',
+          job: 'mutator',
+          instance_id: 'some-sort-of-uuid'
+        }
+      )
+
+      manager.analyze_agents
+    end
+
     it "can analyze all agents" do
       expect(manager.analyze_agents).to eq(0)
 

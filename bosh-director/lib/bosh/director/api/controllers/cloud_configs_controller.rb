@@ -4,16 +4,17 @@ module Bosh::Director
   module Api::Controllers
     class CloudConfigsController < BaseController
       post '/', :consumes => :yaml do
-        properties = request.body.string
-        Bosh::Director::Api::CloudConfigManager.new.update(properties)
+        manifest_text = request.body.read
+        validate_manifest_yml(manifest_text)
 
+        Bosh::Director::Api::CloudConfigManager.new.update(manifest_text)
         status(201)
       end
 
       get '/', scope: :read do
         if params['limit'].nil? || params['limit'].empty?
           status(400)
-          body("limit is required")
+          body('limit is required')
           return
         end
 

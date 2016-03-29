@@ -1,9 +1,11 @@
 require 'common/deep_copy'
+require 'securerandom'
 
 module Bosh::Director
   # Creates VM model and call out to CPI to create VM in IaaS
   class VmCreator
     include EncryptionHelper
+    include PasswordHelper
 
     def initialize(cloud, logger, vm_deleter, disk_manager, job_renderer)
       @cloud = cloud
@@ -96,13 +98,19 @@ module Bosh::Director
     def create(instance_model, stemcell, cloud_properties, network_settings, disks, env)
       agent_id = self.class.generate_agent_id
       env = Bosh::Common::DeepCopy.copy(env)
-      options = {:agent_id => agent_id, :vm_env => env }
+      options = { :agent_id => agent_id }
 
       if Config.encryption?
         credentials = generate_agent_credentials
         env['bosh'] ||= {}
         env['bosh']['credentials'] = credentials
         options[:credentials] = credentials
+      end
+
+      password = env.fetch('bosh', {}).fetch('password', "")
+      if Config.generate_vm_passwords && password == ""
+        env['bosh'] ||= {}
+        env['bosh']['password'] = sha512_hashed_password
       end
 
       count = 0
