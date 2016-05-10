@@ -35,13 +35,47 @@ else
   pkg_mgr install "libsystemd-journal-dev libestr-dev libjson0 libjson0-dev uuid-dev python-docutils libcurl4-openssl-dev"
 
   run_in_chroot $chroot "
+    function check_md5 {
+      if [ -z $1 ] || [ ! -e $1 ] || [ ! -e $1.md5 ] ; then
+        return 1
+      fi
+
+      # Check if utility exists
+      md5util=$(which md5sum)
+      if [ ! "${md5util}" ] ; then
+        return 1
+      fi
+
+      $md5util --check --status $1.md5
+    }
+
     cd /tmp
+    
+    cat > ./liblogging-1.0.5.tar.gz.md5 <<EOF
+    44b8ce2daa1bfb84c9feaf42f9925fd7  liblogging-1.0.5.tar.gz
+    EOF
+    
+    cat > ./librelp-1.2.9.tar.gz.md5 <<EOF
+    6df8123486b6aafde90c64a0a5951892  librelp-1.2.9.tar.gz
+    EOF 
+
+    cat > ./rsyslog-8.15.0.tar.gz.md5 <<EOF
+    3fab1c48e8d8111d4cc412482e2fe39d  rsyslog-8.15.0.tar.gz
+    EOF 
 
     # on ppc64le compile from source as the .deb packages are not available
     # from the repo above
     wget http://download.rsyslog.com/liblogging/liblogging-1.0.5.tar.gz
-    wget http://www.rsyslog.com/download/files/download/rsyslog/rsyslog-8.15.0.tar.gz
+    check_md5 liblogging-1.0.5.tar.gz
+    [ $? != 0 ] && {echo "Checksum error with liblogging-1.0.5.tar.gz" && exit 1}
+    
     wget http://download.rsyslog.com/librelp/librelp-1.2.9.tar.gz
+    check_md5 librelp-1.2.9.tar.gz
+    [ $? != 0 ] && {echo "Checksum error with librelp-1.2.9.tar.gz" && exit 1}
+    
+    wget http://www.rsyslog.com/download/files/download/rsyslog/rsyslog-8.15.0.tar.gz
+    check_md5 rsyslog-8.15.0.tar.gz
+    [ $? != 0 ] && {echo "Checksum error with rsyslog-8.15.0.tar.gz" && exit 1}
 
     tar xvfz liblogging-1.0.5.tar.gz
     cd liblogging-1.0.5
