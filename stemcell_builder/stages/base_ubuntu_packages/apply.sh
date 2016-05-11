@@ -42,7 +42,7 @@ else
 
       # Check if utility exists
       md5util=$(which md5sum)
-      if [ ! "${md5util}" ] ; then
+      if [ ! \"${md5util}\" ] ; then
         return 1
       fi
 
@@ -67,15 +67,15 @@ else
     # from the repo above
     wget http://download.rsyslog.com/liblogging/liblogging-1.0.5.tar.gz
     check_md5 liblogging-1.0.5.tar.gz
-    [ $? != 0 ] && {echo "Checksum error with liblogging-1.0.5.tar.gz" && exit 1}
+    [ $? != 0 ] && {echo \"Checksum error with liblogging-1.0.5.tar.gz\" && exit 1}
     
     wget http://download.rsyslog.com/librelp/librelp-1.2.9.tar.gz
     check_md5 librelp-1.2.9.tar.gz
-    [ $? != 0 ] && {echo "Checksum error with librelp-1.2.9.tar.gz" && exit 1}
+    [ $? != 0 ] && {echo \"Checksum error with librelp-1.2.9.tar.gz\" && exit 1}
     
     wget http://www.rsyslog.com/download/files/download/rsyslog/rsyslog-8.15.0.tar.gz
     check_md5 rsyslog-8.15.0.tar.gz
-    [ $? != 0 ] && {echo "Checksum error with rsyslog-8.15.0.tar.gz" && exit 1}
+    [ $? != 0 ] && {echo \"Checksum error with rsyslog-8.15.0.tar.gz\" && exit 1}
 
     tar xvfz liblogging-1.0.5.tar.gz
     cd liblogging-1.0.5
