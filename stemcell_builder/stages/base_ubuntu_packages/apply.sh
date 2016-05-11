@@ -36,17 +36,7 @@ else
 
   run_in_chroot $chroot "
     function check_md5 {
-      if [ -z $1 ] || [ ! -e $1 ] || [ ! -e $1.md5 ] ; then
-        return 1
-      fi
-
-      # Check if utility exists
-      md5util=$(which md5sum)
-      if [ ! \"${md5util}\" ] ; then
-        return 1
-      fi
-
-      $md5util --check --status $1.md5
+      md5sum --check --status $1.md5
     }
 
     cd /tmp
